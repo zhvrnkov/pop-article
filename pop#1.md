@@ -52,7 +52,7 @@ point2.x = 5            // (3)
 // (4)
 ```
 
-![](value.png)
+![](https://raw.githubusercontent.com/zhvrnkv/pop-article/master/assets/value.png)
 
 1. Размещаем первую структуру на стэке
 2. Копируем содержимое первой структуры
@@ -96,7 +96,7 @@ point2.x = 5            // (3)
 // (4)
 ```
 
-![](reference.png)
+![](https://raw.githubusercontent.com/zhvrnkv/pop-article/master/assets/reference.png)
 
 1. Размещаем тело класса на куче. Размещаем указатель на это тело на стэке
 2. Копируем указатель, который ссылается на тело класса
