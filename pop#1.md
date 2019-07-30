@@ -33,7 +33,7 @@
 Рассмотрим принципы работы стэка в Swift используя структуры (`struct`).
 
 > В Swift типами занчений являются *структуры* (`struct`) и *перечисления* (`enum`), а ссылочными типами являются *классы* (`class`) и *функции/замыкания* (`func`). Типы значений хранятся на стэке, ссылочные типы хранятся на хипе.
-
+[gist](https://gist.github.com/zhvrnkv/e4ded41a299beee05933dbbce537405a)
 ```swift
 struct Point {
     var x, y: Double
@@ -77,7 +77,7 @@ point2.x = 5            // (3)
 
 ##### Ссылочные типы
 Рассмотрим принцип работы кучи в Swift используя классы (`class`).
-
+[gist](https://gist.github.com/zhvrnkv/e751586044584aa4699180f31eec7d25)
 ```swift
 class Point {
     var x, y: Double
@@ -106,6 +106,7 @@ point2.x = 5            // (3)
 ### 1. Аллокация памяти - Небольшой и "Реальный" пример
 
 В некоторых ситуациях выбор в пользу стэка не только упрощает работу с памятью, но и улучшает качество кода. Рассмотрим на примере:
+[gist](https://gist.github.com/zhvrnkv/ad08067670f0a04f93270be5c67762a5)
 ```swift
 enum Color { case red, green, blue }
 enum Orientation { case left, right }
@@ -131,6 +132,7 @@ func makeBalloon(_ color: Color, _ orientation: Orientation, _ tail: Tail) -> UI
 
 Решение:
 1. Использовать вместо строки вполне очевидную здесь структуру:
+[gist](https://gist.github.com/zhvrnkv/3b18060ac327f452a7bd66aa345de67a)
 ```swift
 struct Attributes: Hashable {
     var color: Color
@@ -140,11 +142,13 @@ struct Attributes: Hashable {
 ```
 
 2. Изменить словарь на:
+[gist](https://gist.github.com/zhvrnkv/64baa2e0122e86b85d391b4a1c108e7b)
 ```swift
 var cache: [Attributes: UIImage] = []
 ```
 
 3. Избавиться от `String`:
+[gist](https://gist.github.com/zhvrnkv/bd427754ccc2a87e014dedf2513b0b5f)
 ```swift
 let key = Attributes(color: color, orientation: orientation, tail: tail)
 ```
@@ -166,7 +170,7 @@ Swift должен знать, когда можно освободить фра
 
 ###### Псевдокод
 Рассмотрим небольшой фрагмент псевдокода, для демонстрации работы подсчета ссылок:
-
+[gist](https://gist.github.com/zhvrnkv/369009fd47817f4d9e6f9867ca1d2f01)
 ```swift
 class Point {
     var refCount: Int
@@ -198,6 +202,7 @@ release(point2)
 
 ###### Копирование ссылок
 Снова, `struct`, и любые другие типы значений в Swift, копируются при присваивании. В случае, если структура хранит в себе ссылки, они также скопируются:
+[gist](https://gist.github.com/zhvrnkv/5adc15298a9aaf19bd378e8c7d4d7923)
 ```swift
 struct Label {
     let text: String
@@ -230,7 +235,7 @@ release(label2.font)
 Таким образом, если `struct` хранит в себе ссылки, то, при копировании этой структуры, количество ссылок удваивается, что, при остутствии необходимости, отрицательно сказывается на "легкости" выполнения программы.
 
 ###### И снова "реальный" пример
-
+[gist](https://gist.github.com/zhvrnkv/9d3ae1266c8e764f67ddedd123b40785)
 ```swift
 struct Attachment {
     let fileUrl: URL // ссылка на HEAP память
@@ -257,13 +262,13 @@ struct Attachment {
 `mimeType` - это строка формата `type/extension`
 
 ###### Решение
-
+[gist](https://gist.github.com/zhvrnkv/d39f258255aac8ac84e00cd5c5271fe8)
 ```Swift
 let uuid: UUID // UUID это тип, который дает нам Foundation
 ```
 
 В случае `mimeType` отлично подойдет `enum`:
-
+[gist](https://gist.github.com/zhvrnkv/535373508f60cc8882470d692e50a5cf)
 ```Swift
 enum MimeType {
     init?(rawValue: String) {
@@ -282,6 +287,7 @@ enum MimeType {
 }
 ```
 Или лучше и проще:
+[gist](https://gist.github.com/zhvrnkv/7da31693d3e075627a33984372c993ed)
 ```swift
 enum MimeType: String {
     case jpeg = "image/jpeg"
@@ -294,6 +300,7 @@ enum MimeType: String {
 ### 3. Отправка метода
 Прежде чем говорить о реализации и определении этого механизма, стоит определить, что такое "сообщение" и "метод" в этом контексте:
 + сообщение - это имя, которое мы отсылаем объекту. Вместе с именем ещё могут быть отправлены аргументы
+[gist](https://gist.github.com/zhvrnkv/db978c6fae6e2170b9cd46202a4ef535)
 ```swift
 circle.draw(in: origin)
 ```
@@ -304,6 +311,7 @@ circle.draw(in: origin)
 
 ##### Более конкретно об Отправка метода в Swift
 Так как мы можем унаследоваться от родительского класса и переопределить его методы, то Swift должен точно знать какую реализацию этого метода нужно вызвать в конкретной ситуации.
+[gist](https://gist.github.com/zhvrnkv/7c01cc76df6c8ae0fe5f39df580a2a96)
 ```swift
 class Parent {
   func me() {
@@ -319,6 +327,7 @@ class Child: Parent {
 ```
 
 Создадим пару инстансов и вызовем метод `me`:
+[gist](https://gist.github.com/zhvrnkv/92e16ce102a4be2df4b5692ba77b5f03)
 ```swift
 let parent = Parent()
 let child = Child()
@@ -328,6 +337,7 @@ child.me() // "child"
 ```
 
 Довольно очевидный и простой пример, а что если:
+[gist](https://gist.github.com/zhvrnkv/51124c83106e1be90f7312f8e562b2c6)
 ```swift
 let array: [Parent] = [Child(), Child(), Parent(), Child()]
 array.forEach {
@@ -353,7 +363,7 @@ array.forEach {
 
 ### 3. Отправка метода - Inlining
 Был упомянут такой механизм, как **inlining**, но что это? Рассмотрим на примере:
-
+[gist](https://gist.github.com/zhvrnkv/52a5563c687eb669a49c61777034ed11)
 ```swift
 struct Point {
     var x, y: Double
@@ -372,11 +382,13 @@ drawAPoint(point)
 
 - `point.draw()` метод и `drawAPoint` функция будут обработаны через **Static Dispatch**, так как здесь нет никакой сложности в определении корректной реализации для компилятора (т.к. нет наследования и переопределение невозможно)
 - так как компилятор знает, что будет выполнено, он может оптимизировать это. Сначала оптимизирует `drawAPoint`, просто заменив вызов функции на её код:
+[gist](https://gist.github.com/zhvrnkv/7166533002c231ab40e54912a2ae4927)
 ```swift
 let point = Point(x: 0, y: 0)
 point.draw()
 ```
 - затем оптимизирует `point.draw` так как реализация этого метода также известна:
+[gist](https://gist.github.com/zhvrnkv/93f98faa72671df710ce0b35f7b15cf7)
 ```swift
 let point = Point(x: 0, y: 0)
 // Point.draw implementation
@@ -386,6 +398,7 @@ let point = Point(x: 0, y: 0)
 
 ### 3. Отправка метода - Полиморфизм при помощи наследования
 Зачем вообще нужен механизм для определения реализации метода? Без него невозможно определить переопределенные дочерними классами методы. Не был бы возможен **полиморфизм**. Рассмотрим на примере:
+[gist](https://gist.github.com/zhvrnkv/181a22c77ff1ee9a176d9fa40f16bd96)
 ```swift
 class Drawable { func draw() {} }
 
@@ -413,6 +426,7 @@ for d in drawables {
 > Метод класса хранится в virtual-table и не имеет ни малейшего понятия о `self`. Для того, чтобы использовать `self` внутри этого метода, его (`self`) нужно туда передать.
 
 Таким образом, компилятор изменит этот код на:
+[gist](https://gist.github.com/zhvrnkv/543ec4c7027a6cf09aa1ed055323fddb)
 ```swift
 class Point: Drawable {
   ...
@@ -442,4 +456,4 @@ for d in drawables {
 3. При вызове метода чем он будет обработан?
 
 Если мы платим за динамичность, не осознавая этого и не имея в этом надобности, то это отрицательно скажется на выполняемой программе.
-Полиморфизм - очень важная и полезная вещь. На данный момент известно лишь то, что полиморфизм в Swift - напрямую связан с классами и ссылочными типами. Мы же, в свою очередь, говорим, что классы - это медленно и тяжело, а струткру - просто и легко. Возможен ли полиморфизм, реализованный через структуры? Ответ на этот вопрос может дать Протокольно Ориентированное 
+Полиморфизм - очень важная и полезная вещь. На данный момент известно лишь то, что полиморфизм в Swift - напрямую связан с классами и ссылочными типами. Мы же, в свою очередь, говорим, что классы - это медленно и тяжело, а струткру - просто и легко. Возможен ли полиморфизм, реализованный через структуры? Ответ на этот вопрос может дать [Протокольно Ориентированное Программирование](https://github.com/zhvrnkv/pop-article/blob/master/pop%232.md)
