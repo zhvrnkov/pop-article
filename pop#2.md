@@ -102,6 +102,7 @@ let point: Drawable = Point(...)
 let line: Drawable = Line(...)
 ```
 `Line()` занимает 4 машинных слова и не может поместиться в value buffer - программа выделит для нее память на хипе, а в value buffer сложит поинтер на эту память:
+
 | Existential Container |
 |--------------|
 | ptr: Pointer |
