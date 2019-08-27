@@ -288,7 +288,7 @@ let pair = Pair(aLine, aLine)
 let copy = pair
 ```
 1. После выполнения кода выше имеем данное состояние памяти:
-![](./assets/pop#2-copy-class.jpg)
+![](./assets/reference)
 
 2. После изменения `copy.second` (`copy.second.x1 = 3.0`) получим:
 ![](./assets/pop#2-copy-indirect-storage.jpg)
