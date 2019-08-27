@@ -288,10 +288,10 @@ let pair = Pair(aLine, aLine)
 let copy = pair
 ```
 1. После выполнения кода выше имеем данное состояние памяти:
-![](assets/pop#2-copy-class.jps)
+![](./assets/pop#2-copy-class.jps)
 
 2. После изменения `copy.second` (`copy.second.x1 = 3.0`) получим:
-![](assets/pop#2-copy-indirect-storage.png)
+![](./assets/pop#2-copy-indirect-storage.png)
 
 Иными словами мы имеем два экземпляра `Pair` которые делят между собой один `storage: LineStorage`. При изменении `storage` в одном из его пользователей (first/second) будет создана отдельная копия `storage` для этого пользователя, чтобы его изменение не сказались на других. Это решает проблему нарушение  семантики типов значений из прошлого примера 
 
