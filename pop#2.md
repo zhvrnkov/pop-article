@@ -238,7 +238,7 @@ let pair = Pair(aLine, aLine)
 let copy = pair
 ```
 После выполнения этого кода програма получит следющее состояние памяти:
-![](./assets/pop#2-copy-struct.jpg)
+![](./assets/pop\#2-copy-struct.jpg)
 
 Мы имеем 4 выделения памяти на куче, что не есть хорошо. Попробуем исправить:
 1. Создадим класс-аналог `Line`
@@ -256,7 +256,7 @@ let copy = pair
 ```
 
 Получаем одно размещение на куче и 4 указателя на него:
-![](assets/pop#2-copy-class.png)
+![](assets/pop\#2-copy-class.jpg)
 
 Но мы имеем дело с ссылочным поведением. Изменение `copy.first` отразится на `pair.first` (то же самое для `.second`), а это не всегда то, что мы хотим.
 
@@ -288,10 +288,10 @@ let pair = Pair(aLine, aLine)
 let copy = pair
 ```
 1. После выполнения кода выше имеем данное состояние памяти:
-![](./assets/reference.png)
+![](./assets/pop\#2-copy-class.jpg)
 
 2. После изменения `copy.second` (`copy.second.x1 = 3.0`) получим:
-![](./assets/pop#2-copy-indirect-storage.jpg)
+![](./assets/pop\#2-copy-indirect-storage.jpg)
 
 Иными словами мы имеем два экземпляра `Pair` которые делят между собой один `storage: LineStorage`. При изменении `storage` в одном из его пользователей (first/second) будет создана отдельная копия `storage` для этого пользователя, чтобы его изменение не сказались на других. Это решает проблему нарушение  семантики типов значений из прошлого примера 
 
