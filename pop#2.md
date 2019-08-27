@@ -9,6 +9,8 @@
 	
 #### Реализация полиморфизма без наследования и ссылочных типов:
 ```swift
+https://gist.github.com/zhvrnkv/6db3762e2ff6553b6651a823781e7ab0
+
 protocol Drawable { 
 	func draw()
 }
@@ -58,6 +60,8 @@ for d in drawbles {
 2. Элементы массива должны быть одного размера (в этом и есть суть массива). Тогда как массив `drawable` может соответствовать этому требованию, если он может хранить в себе и `Line` и `Point`, а они имеют разные размеры?
 
 ```swift
+https://gist.github.com/zhvrnkv/802ce1c2f17a698612dc38214b4b8808
+
 MemoryLayout.size(ofValue: Line(...))  // 32 bits
 MemoryLayout.size(ofValue: Point(...)) // 16 bits
 ```
@@ -83,6 +87,8 @@ MemoryLayout.size(ofValue: Point(...)) // 16 bits
 ##### Буффер Содержимого (Value Buffer)
 Просто три машинных слова для хранения экземпляра. Если экземпляр может уместиться в буффере содержимого, то он в нем и хранится. Если экземпляр больше 3 машинных слов, то он не поместится в буфере и программа вынуждена выделить память на куче, сложить туда экземпляр, а в буффер содержимого положить указатель на эту память. Рассмотрим на примере:
 ```swift
+https://gist.github.com/zhvrnkv/a121eb43d2b35b534a95bd0e7b335449
+
 let point: Drawable = Point(...)
 ```
 `Point()` занимает 2 машинных слова и прекрасно поместится в value buffer - программа сложит его туда: 
@@ -96,6 +102,8 @@ let point: Drawable = Point(...)
 | pwt          |
 
 ```swift
+https://gist.github.com/zhvrnkv/865cde045e99e8b2aa26660b1410af5e
+
 let line: Drawable = Line(...)
 ```
 `Line()` занимает 4 машинных слова и не может поместиться в value buffer - программа выделит для нее память на хипе, а в value buffer сложит поинтер на эту память:
@@ -135,6 +143,8 @@ let line: Drawable = Line(...)
 1. Протокольно-методная таблица хранится в Экзистенциальный контейнере этого объекта и может быть без труда из него получена
 2. Если тип элемента массива является протоколом, то любой элемент этого массива занимает фиксирвоанное значение в 5 машинных слов - именно столько необходимо для Экзистенциального контейнера. Если содержимое элемента не может быть помещено в буффер значений, то он будет размещен на куче. Если может, то все содержимое будет размещенно в буффере значений. В любом случае мы получим, что размер объекта с типом протокола равен 5 машинным словам (40 бит), а из этого следует, что все элементы массива будут иметь одинаковый размер
 ```swift
+https://gist.github.com/zhvrnkv/6063de4b6f4074c8413d11b1f833b7a2
+
 let line: Drawable = Line(...)
 MemoryLayout.size(ofValue: line) // 40 бит
 
@@ -146,6 +156,8 @@ MemoryLayout.size(ofValue: drawables._content) // 120 бит
 ##### Экзистенциальный контейнер - Пример
 Рассмсотрим поведение экзистенциального контейнера в этом коде:
 ```swift
+https://gist.github.com/zhvrnkv/b341d9cdde3695ca0fcf2d41a1c221d9
+
 func drawACopy(local: Drawable) {
 	local.draw()
 }
@@ -155,6 +167,8 @@ drawACopy(val)
 
 Экзистенциальный контейнер можно представить вот так:
 ```swift
+https://gist.github.com/zhvrnkv/d9d89de1ee2798a90ed6ee756dae2f2c
+
 struct ExistContDrawable {
 	var valueBuffer: (Int, Int, Int)
 	var vwt: ValueWitnessTable
@@ -165,6 +179,8 @@ struct ExistContDrawable {
 **Псевдо код**
 За кулисами функция `drawACopy` принимает в себя `ExistContDrawable`:
 ```swift
+https://gist.github.com/zhvrnkv/481955c317a25854ad45a8eae04783b9
+
 func drawACopy(val: ExistContDrawable) {
 	...
 }
@@ -172,6 +188,8 @@ func drawACopy(val: ExistContDrawable) {
 
 Параметр функции создается вручную: создаем контейнер, заполняем его поля из полученного аргумента:
 ```swift
+https://gist.github.com/zhvrnkv/6a36cf3ad1d9f944fe62efc964b00677
+
 func drawACopy(val: ExistContDrawable) {
 	var local = ExistContDrawable()
 	let vwt = val.vwt
@@ -183,6 +201,8 @@ func drawACopy(val: ExistContDrawable) {
 ```
 Решаем где будет хранится содержимое (в буффере или хипе). Вызываем `vwt.allocate` и `vwt.copy` чтобы заполнить `local` содержимым `val`:
 ```swift
+https://gist.github.com/zhvrnkv/057cbd6d1efec1c0a633e2c5dfdc2a26
+
 func drawACopy(val: ExistContDrawable) {
 	...
 	vwt.allocateBufferAndCopy(&local, val)
@@ -191,6 +211,8 @@ func drawACopy(val: ExistContDrawable) {
 
 Вызываем метод `draw` и передаем ему указатель на `self` (`projectBuffer` метод решит где расположен `self` - в буфере или на куче - и вернет верный указатель):
 ```swift
+https://gist.github.com/zhvrnkv/14a506625a48e2dc470ff081217f0f39
+
 func drawACopy(val: ExistContDrawable) {
 	...
 	pwt.draw(vwt.projectBuffer(&local))
@@ -199,6 +221,8 @@ func drawACopy(val: ExistContDrawable) {
 
 Завершаем работу с `local`. Чистим все ссылки на хип от `local`. Функция возвращает значение - чистим всю память, выделенную для работы `drawACopy` (стэковый кадр):
 ```swift
+https://gist.github.com/zhvrnkv/93995bda089a31450cc9bfe7a03c339c
+
 func drawACopy(val: ExistContDrawable) {
 	...
 	vwt.destructAndDeallocateBuffer(&local)
@@ -215,6 +239,8 @@ func drawACopy(val: ExistContDrawable) {
 ##### Экзистенциальный контейнер - Хранимые свойства
 Мы рассмотрели как переменная протокольного типа передается и используется функцией. Рассмотрим как такие переменные хранятся:
 ```swift
+https://gist.github.com/zhvrnkv/cc827a157577fa744e0c451d5d1117ae
+
 struct Pair {
     init(_ f: Drawable, _ s: Drawable) {
         first = f 
@@ -229,10 +255,14 @@ var pair = Pair(Line(), Point())
 
 Каким образом хранятся эти две структуры типа `Drawable` внутри структуры `Pair`? Что представляет из себя содержимое `pair`? Оно представляет из себя два э.контейнера - один для `first`, другой для `second`. `Line` не может поместится в буффере и размещена на куче. `Point` поместился в буффере. Также это позволяет структуре `Pair` хранить объекты разного размера:
 ```swift
+https://gist.github.com/zhvrnkv/713cd5d68446bd9785b2bd94ffac2d4e
+
 pair.second = Line()
 ```
 Теперь и содержимое second размещено на куче, так как не поместилось в буффер. Рассмотрим к чему это может привести:
 ```swift
+https://gist.github.com/zhvrnkv/1bcbc0c49ec7178bdfbc047a2464f9f7
+
 let aLine = Line(...)
 let pair = Pair(aLine, aLine)
 let copy = pair
@@ -243,6 +273,8 @@ let copy = pair
 Мы имеем 4 выделения памяти на куче, что не есть хорошо. Попробуем исправить:
 1. Создадим класс-аналог `Line`
 ```swift
+https://gist.github.com/zhvrnkv/1628fde4a8aa155c1eaf059e331a5e00
+
 class LineStorage: Drawable {
 	var x1, y1, x2, y2: Double 
 	func draw() {}
@@ -250,6 +282,8 @@ class LineStorage: Drawable {
 ```
 2. Используем его в `Pair`
 ```swift
+https://gist.github.com/zhvrnkv/45e540e46b7f194efb1b846e949c5494
+
 let lineStorage = LineStorage(...)
 let pair = Pair(lineStorage, lineStorage)
 let copy = pair
@@ -263,6 +297,8 @@ let copy = pair
 ##### Косвенное хранение и копирование при изменении (copy-on-write)
 До этого было упомянуто, что `String` это copy-on-write структура (хранит свое содержимое на куче и копирует его при изменении). Рассмотрим как можно реализовать свою структуру, которая копируется при изменении:
 ```swift
+https://gist.github.com/zhvrnkv/5739519ff84b6e72c8ebcfb88fbb2542
+
 struct BetterLine: Drawable {
     private var storage: LineStorage
     init() {
@@ -283,6 +319,8 @@ struct BetterLine: Drawable {
 
 Посмотрим как это работает в памяти:
 ```swift
+https://gist.github.com/zhvrnkv/d237a36260a79f0223a907480ba84cab
+
 let aLine = BetterLine()
 let pair = Pair(aLine, aLine)
 let copy = pair
